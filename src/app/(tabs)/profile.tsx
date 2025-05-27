@@ -1,175 +1,147 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { useAuthStore } from '@/store/authStore';
-import { colors } from '@/constants/colors';
-import Button from '@/components/Button';
-import { LogOut, User, Clock, Heart, Settings, Shield, HelpCircle, Info } from 'lucide-react-native';
+import React, { useState } from "react";
+import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
+import { useRouter } from "expo-router";
+import { LogOut, User } from "lucide-react-native";
+import Colors from "@/constants/colors";
+import useAuthStore from "@/store/authStore";
+import { LinearGradient } from "expo-linear-gradient";
+import LogoutConfirmationModal from "@/components/LogoutConfirmationModal";
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { user, logout } = useAuthStore();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        { 
-          text: "Logout", 
-          onPress: () => logout(),
-          style: "destructive"
-        }
-      ]
-    );
+    setShowLogoutModal(true);
   };
 
-  const menuItems = [
-    {
-      icon: <User size={22} color={colors.text.primary} />,
-      title: "Personal Information",
-      onPress: () => Alert.alert("Feature", "This feature is coming soon!")
-    },
-    {
-      icon: <Clock size={22} color={colors.text.primary} />,
-      title: "Booking History",
-      onPress: () => Alert.alert("Feature", "This feature is coming soon!")
-    },
-    {
-      icon: <Heart size={22} color={colors.text.primary} />,
-      title: "Saved Vehicles",
-      onPress: () => Alert.alert("Feature", "This feature is coming soon!")
-    },
-    {
-      icon: <Settings size={22} color={colors.text.primary} />,
-      title: "Settings",
-      onPress: () => Alert.alert("Feature", "This feature is coming soon!")
-    },
-    {
-      icon: <Shield size={22} color={colors.text.primary} />,
-      title: "Privacy & Security",
-      onPress: () => Alert.alert("Feature", "This feature is coming soon!")
-    },
-    {
-      icon: <HelpCircle size={22} color={colors.text.primary} />,
-      title: "Help & Support",
-      onPress: () => Alert.alert("Feature", "This feature is coming soon!")
-    },
-    {
-      icon: <Info size={22} color={colors.text.primary} />,
-      title: "About",
-      onPress: () => Alert.alert("Feature", "This feature is coming soon!")
-    }
-  ];
+  const handleLogoutConfirm = () => {
+    setShowLogoutModal(false);
+    logout();
+    router.replace("/(auth)");
+  };
+
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading profile...</Text>
+      </View>
+    );
+  }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <View style={styles.header}>
-        <View style={styles.avatarContainer}>
-          <Text style={styles.avatarText}>{user?.name.charAt(0)}</Text>
-        </View>
-        <Text style={styles.name}>{user?.name}</Text>
-        <Text style={styles.email}>{user?.email}</Text>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={[Colors.primary, Colors.primaryDark]}
+        style={styles.profileHeader}
+      >
+        {user.avatar ? (
+          <Image source={{ uri: user.avatar }} style={styles.avatar} />
+        ) : (
+          <View style={styles.avatarPlaceholder}>
+            <User size={40} color={Colors.textSecondary} />
+          </View>
+        )}
+
+        <Text style={styles.email}>{user.username}</Text>
+      </LinearGradient>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Account</Text>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <LogOut size={20} color={Colors.error} />
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.menuContainer}>
-        {menuItems.map((item, index) => (
-          <TouchableOpacity 
-            key={index} 
-            style={styles.menuItem}
-            onPress={item.onPress}
-          >
-            <View style={styles.menuIconContainer}>
-              {item.icon}
-            </View>
-            <Text style={styles.menuTitle}>{item.title}</Text>
-          </TouchableOpacity>
-        ))}
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Personal Finance Tracker v1.0</Text>
       </View>
 
-      <View style={styles.logoutContainer}>
-        <Button
-          title="Logout"
-          onPress={handleLogout}
-          variant="outline"
-          size="large"
-          fullWidth
-          icon={<LogOut size={20} color={colors.primary} />}
-        />
-      </View>
-
-      <Text style={styles.versionText}>Version 1.0.0</Text>
-    </ScrollView>
+      <LogoutConfirmationModal
+        visible={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogoutConfirm}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: Colors.background,
   },
-  contentContainer: {
-    padding: 16,
+  profileHeader: {
+    paddingTop: 60,
+    paddingBottom: 30,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  header: {
-    alignItems: 'center',
-    marginVertical: 24,
-  },
-  avatarContainer: {
+  avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: 16,
   },
-  avatarText: {
-    fontSize: 40,
-    fontWeight: '600',
-    color: 'white',
+  avatarPlaceholder: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: Colors.background,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   name: {
     fontSize: 24,
-    fontWeight: '600',
-    color: colors.text.primary,
+    fontWeight: "bold",
+    color: "white",
     marginBottom: 4,
   },
   email: {
     fontSize: 16,
-    color: colors.text.secondary,
+    color: "white",
   },
-  menuContainer: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    marginBottom: 24,
-    overflow: 'hidden',
+  section: {
+    padding: 20,
   },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: Colors.text,
+    marginBottom: 16,
   },
-  menuIconContainer: {
-    width: 40,
-    alignItems: 'center',
-    marginRight: 12,
+  logoutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.card,
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
-  menuTitle: {
+  logoutText: {
+    marginLeft: 12,
     fontSize: 16,
-    color: colors.text.primary,
+    color: Colors.error,
+    fontWeight: "600",
   },
-  logoutContainer: {
-    marginBottom: 24,
+  footer: {
+    position: "absolute",
+    bottom: 20,
+    left: 0,
+    right: 0,
+    alignItems: "center",
   },
-  versionText: {
-    textAlign: 'center',
-    color: colors.text.light,
-    marginBottom: 20,
+  footerText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
   },
 });

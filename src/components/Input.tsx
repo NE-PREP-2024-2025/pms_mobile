@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, TextInput, View, Text, TouchableOpacity } from 'react-native';
 import { Eye, EyeOff } from 'lucide-react-native';
-import { colors } from '@/constants/colors';
+import  colors  from '@/constants/colors';
 
 interface InputProps {
   label?: string;
@@ -53,9 +53,9 @@ export default function Input({
         {secureTextEntry && (
           <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
             {isPasswordVisible ? (
-              <EyeOff size={20} color={colors.text.secondary} />
+              <EyeOff size={20} color={colors.textSecondary} />
             ) : (
-              <Eye size={20} color={colors.text.secondary} />
+              <Eye size={20} color={colors.textSecondary} />
             )}
           </TouchableOpacity>
         )}
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.text.primary,
+    color: colors.primary,
     marginBottom: 6,
   },
   inputContainer: {
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     fontSize: 16,
-    color: colors.text.primary,
+    color: colors.primary,
   },
   multiline: {
     minHeight: 100,

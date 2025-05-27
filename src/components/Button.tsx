@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, ActivityIndicator, View, StyleProp, ViewStyle } from 'react-native';
-import { colors } from '@/constants/colors';
+import  colors  from '@/constants/colors';
 
 interface ButtonProps {
   title: string;
@@ -129,6 +129,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   disabledText: {
-    color: colors.text.light,
+    color: colors.textSecondary,
   },
 });

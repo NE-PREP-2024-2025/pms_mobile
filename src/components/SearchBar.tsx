@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity } from 'react-native';
 import { Search, X } from 'lucide-react-native';
-import { colors } from '@/constants/colors';
+import  colors  from '@/constants/colors';
 
 interface SearchBarProps {
   value: string;
@@ -19,19 +19,19 @@ export default function SearchBar({
   return (
     <View style={styles.container}>
       <View style={styles.searchIcon}>
-        <Search size={20} color={colors.text.secondary} />
+        <Search size={20} color={colors.textSecondary} />
       </View>
       <TextInput
         style={styles.input}
         placeholder={placeholder}
-        placeholderTextColor={colors.text.light}
+        placeholderTextColor={colors.text}
         value={value}
         onChangeText={onChangeText}
         clearButtonMode="never"
       />
       {value.length > 0 && (
         <TouchableOpacity style={styles.clearButton} onPress={onClear}>
-          <X size={18} color={colors.text.secondary} />
+          <X size={18} color={colors.textSecondary} />
         </TouchableOpacity>
       )}
     </View>
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: colors.text.primary,
+    color: colors.primary,
   },
   clearButton: {
     padding: 4,

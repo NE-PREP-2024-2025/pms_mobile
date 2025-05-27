@@ -1,20 +1,22 @@
-// Color palette for the app
-export const colors = {
-  primary: "#4A6FA5", // Pastel blue
-  secondary: "#9BA4B4", // Light gray-blue
-  accent: "#F9A826", // Warm yellow for CTAs
-  background: "#F8F9FA", // Light background
-  card: "#FFFFFF", // White card background
-  text: {
-    primary: "#2D3748", // Dark gray for primary text
-    secondary: "#718096", // Medium gray for secondary text
-    light: "#A0AEC0", // Light gray for tertiary text
+const Colors = {
+  primary: "#6366F1",
+  primaryDark: "#4F46E5",
+  secondary: "#EC4899",
+  background: "#F9FAFB",
+  card: "#FFFFFF",
+  text: "#1F2937",
+  textSecondary: "#6B7280",
+  border: "#E5E7EB",
+  error: "#EF4444",
+  success: "#10B981",
+  categories: {
+    food: "#F59E0B",
+    transport: "#3B82F6",
+    entertainment: "#EC4899",
+    shopping: "#8B5CF6",
+    bills: "#EF4444",
+    other: "#6B7280",
   },
-  border: "#E2E8F0", // Light border color
-  success: "#48BB78", // Green for success states
-  error: "#F56565", // Red for error states
-  available: "#68D391", // Green for available vehicles
-  unavailable: "#FC8181", // Red for unavailable vehicles
 };
 
-export default colors;
+export default Colors;

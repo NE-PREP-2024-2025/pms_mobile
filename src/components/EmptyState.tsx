@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { colors } from '@/constants/colors';
+import colors  from '@/constants/colors';
 import Button from './Button';
 
 interface EmptyStateProps {
@@ -50,13 +50,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.text,
     marginBottom: 8,
     textAlign: 'center',
   },
   message: {
     fontSize: 16,
-    color: colors.text.secondary,
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 24,
   },

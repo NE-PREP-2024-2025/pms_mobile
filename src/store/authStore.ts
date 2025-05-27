@@ -1,32 +1,16 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { User } from '@/types';
-import { router } from 'expo-router';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "@/services/api";
+import {
+  AuthState,
+  LoginCredentials,
+  RegisterCredentials,
+  User,
+} from "@/types/auth";
+import { AxiosError } from "axios";
 
-interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
-  clearError: () => void;
-}
-
-// Mock users for demo purposes
-const mockUsers = [
-  {
-    id: '1',
-    email: 'user@example.com',
-    password: 'password123',
-    name: 'John Doe',
-    phone: '555-123-4567'
-  }
-];
-
-export const useAuthStore = create<AuthState>()(
+const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
@@ -34,96 +18,155 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
 
-      login: async (email, password) => {
-        set({ isLoading: true, error: null });
-        
+      login: async (credentials: LoginCredentials) => {
         try {
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          const user = mockUsers.find(u => u.email === email);
-          
-          if (!user || user.password !== password) {
+          set({ isLoading: true, error: null });
+
+          // Validate credentials
+          if (!credentials.username || !credentials.password) {
+            set({ isLoading: false, error: "Email and password are required" });
+            return;
+          }
+
+          // Validate email format
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(credentials.username)) {
+            set({
+              isLoading: false,
+              error: "Please enter a valid email address",
+            });
+            return;
+          }
+
+          // Attempt to find user
+          const response = await api.get(
+            `/users?username=${credentials.username}`
+          );
+
+          if (!response.data || response.data.length === 0) {
+            set({ isLoading: false, error: "Invalid email or password" });
             throw new Error("Invalid email or password");
           }
-          
-          const { password: _, ...userWithoutPassword } = user;
-          
-          set({
-            user: userWithoutPassword as User,
-            isAuthenticated: true,
-            isLoading: false
-          });
-          
-          // Redirect to home page after successful login
-          router.replace('/');
-        } catch (error) {
-          set({
-            error: error instanceof Error ? error.message : "An error occurred",
-            isLoading: false
-          });
-        }
-      },
 
-      register: async (name, email, password) => {
-        set({ isLoading: true, error: null });
-        
-        try {
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          // Check if user already exists
-          if (mockUsers.some(u => u.email === email)) {
-            throw new Error("Email already in use");
+          const user = response.data[0];
+           console.log(user)
+
+          // Compare passwords (in a real app, use proper password hashing)
+          if (credentials.password != user.password) {
+            set({ isLoading: false, error: "Invalid email or password" });
+            throw new Error("Invalid email or password");
           }
-          
-          // In a real app, you would send this to your backend
-          const newUser = {
-            id: String(mockUsers.length + 1),
-            email,
-            name,
-            password,
-            phone: '' // Add default empty phone to satisfy the type
-          };
-          
-          // Add to mock users (for demo only)
-          mockUsers.push(newUser);
-          
-          const { password: _, ...userWithoutPassword } = newUser;
-          
+
+          // Login successful
           set({
-            user: userWithoutPassword as User,
+            user,
             isAuthenticated: true,
-            isLoading: false
+            isLoading: false,
+            error: null,
           });
-          
-          // Redirect to home page after successful registration
-          router.replace('/');
+          return user;
         } catch (error) {
-          set({
-            error: error instanceof Error ? error.message : "An error occurred",
-            isLoading: false
-          });
+          // Handle API errors
+          if (error instanceof AxiosError) {
+            set({
+              isLoading: false,
+              error:
+                error.response?.status === 404
+                  ? "Invalid email or password"
+                  : "Login failed. Please try again.",
+            });
+          } else {
+            set({
+              isLoading: false,
+              error: "An unexpected error occurred. Please try again.",
+            });
+          }
         }
       },
 
       logout: () => {
         set({
           user: null,
-          isAuthenticated: false
+          isAuthenticated: false,
+          error: null,
+          isLoading: false,
         });
-        
-        // Redirect to login page after logout
-        router.replace('/');
       },
 
       clearError: () => {
-        set({ error: null });
-      }
+        
+        set({ error: null,isLoading:false });
+      },
+
+      register: async (credentials: RegisterCredentials) => {
+        try {
+          // Reset state and start loading
+          set({ isLoading: true, error: null });
+
+          // Validate required fields
+          if (!credentials.username || !credentials.password) {
+            set({ isLoading: false, error: "All fields are required" });
+            return;
+          }
+
+          // Validate email format
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(credentials.username)) {
+            set({
+              isLoading: false,
+              error: "Please enter a valid email address",
+            });
+            return;
+          }
+
+          // Check if user already exists
+          const response = await api.get(
+            `/users?username=${credentials.username}`
+          );
+          if (response.data && response.data.length > 0) {
+            set({ isLoading: false, error: "User already exists" });
+            return;
+          }
+
+          // Create new user
+          const newUser: User = {
+            id: Date.now().toString(),
+            username: credentials.username,
+            password: credentials.password, // In a real app, hash the password
+            createdAt: new Date().toISOString(),
+          };
+
+          await api.post("/users", newUser);
+
+          // Auto login after registration
+          set({
+            user: newUser,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          });
+        } catch (error) {
+          if (error instanceof AxiosError) {
+            set({
+              isLoading: false,
+              error:
+                error.response?.data?.message ||
+                "Registration failed. Please try again.",
+            });
+          } else {
+            set({
+              isLoading: false,
+              error: "An unexpected error occurred. Please try again.",
+            });
+          }
+        }
+      },
     }),
     {
-      name: 'auth-storage',
-      storage: createJSONStorage(() => AsyncStorage)
+      name: "auth-storage",
+      storage: createJSONStorage(() => AsyncStorage),
     }
   )
 );
+
+export default useAuthStore;

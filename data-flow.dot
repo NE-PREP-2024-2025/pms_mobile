@@ -1,0 +1,97 @@
+
+digraph PersonalFinanceTracker {
+    rankdir=TB;
+    node [shape=box, style=filled, fillcolor=lightblue];
+    edge [color=navy];
+
+    // Start
+    Start [label="Start: User Opens App"];
+    LoginScreen [label="Login Screen"];
+
+    // Login Flow
+    EnterCredentials [label="User Enters\nUsername & Password"];
+    ValidateLogin [label="Validate Input\n(Email format, non-empty password)", shape=diamond];
+    ErrorInvalidLogin [label="Show Error:\n'Invalid email or password'", fillcolor=pink];
+    GetUsers [label="GET /users?username"];
+    BackendResponseLogin [label="Backend Response", shape=diamond];
+    ErrorCredentials [label="Show Error:\n'Invalid username or password'", fillcolor=pink];
+    ExpensesListScreen [label="Navigate to\nExpenses List Screen"];
+
+    // Expenses List Flow
+    FetchExpenses [label="Fetch Expenses:\nGET /expenses"];
+    BackendResponseExpenses [label="Backend Response", shape=diamond];
+    ErrorFetchExpenses [label="Show Error:\n'Failed to fetch expenses'", fillcolor=pink];
+    DisplayExpenses [label="Display Expenses\nin FlatList"];
+    UserAction [label="User Action", shape=diamond];
+
+    // Create Expense Flow
+    CreateExpenseScreen [label="Create Expense Screen"];
+    EnterExpense [label="User Enters\nAmount, Description, Date"];
+    ValidateExpense [label="Validate Input\n(Positive amount, non-empty fields)", shape=diamond];
+    ErrorInvalidExpense [label="Show Error:\ne.g., 'Amount must be positive'", fillcolor=pink];
+    PostExpense [label="POST /expenses"];
+    BackendResponseCreate [label="Backend Response", shape=diamond];
+    ErrorCreateExpense [label="Show Error:\n'Failed to create expense'", fillcolor=pink];
+    SuccessCreate [label="Show Success:\n'Expense created successfully'"];
+
+    // View Expense Details Flow
+    SelectExpense [label="Select Expense"];
+    GetExpenseDetails [label="GET /expenses/{expenseId}"];
+    BackendResponseDetails [label="Backend Response", shape=diamond];
+    ErrorFetchDetails [label="Show Error:\n'Failed to fetch expense details'", fillcolor=pink];
+    ExpenseDetailsScreen [label="Display Expense\nDetails Screen"];
+
+    // Delete Expense Flow
+    DeleteExpense [label="Click Delete"];
+    DeleteExpenseAPI [label="DELETE /expenses/{expenseId}"];
+    BackendResponseDelete [label="Backend Response", shape=diamond];
+    ErrorDeleteExpense [label="Show Error:\n'Failed to delete expense'", fillcolor=pink];
+    SuccessDelete [label="Show Success:\n'Expense deleted successfully'"];
+
+    // Connections
+    Start -> LoginScreen;
+    LoginScreen -> EnterCredentials;
+    EnterCredentials -> ValidateLogin;
+    ValidateLogin -> ErrorInvalidLogin [label="Invalid"];
+    ErrorInvalidLogin -> LoginScreen;
+    ValidateLogin -> GetUsers [label="Valid"];
+    GetUsers -> BackendResponseLogin;
+    BackendResponseLogin -> ErrorCredentials [label="404 or mismatch"];
+    ErrorCredentials -> LoginScreen;
+    BackendResponseLogin -> ExpensesListScreen [label="Success"];
+
+    ExpensesListScreen -> FetchExpenses;
+    FetchExpenses -> BackendResponseExpenses;
+    BackendResponseExpenses -> ErrorFetchExpenses [label="Error"];
+    ErrorFetchExpenses -> ExpensesListScreen;
+    BackendResponseExpenses -> DisplayExpenses [label="Success"];
+    DisplayExpenses -> UserAction;
+
+    UserAction -> CreateExpenseScreen [label="Create Expense"];
+    CreateExpenseScreen -> EnterExpense;
+    EnterExpense -> ValidateExpense;
+    ValidateExpense -> ErrorInvalidExpense [label="Invalid"];
+    ErrorInvalidExpense -> CreateExpenseScreen;
+    ValidateExpense -> PostExpense [label="Valid"];
+    PostExpense -> BackendResponseCreate;
+    BackendResponseCreate -> ErrorCreateExpense [label="Error"];
+    ErrorCreateExpense -> CreateExpenseScreen;
+    BackendResponseCreate -> SuccessCreate [label="Success"];
+    SuccessCreate -> ExpensesListScreen;
+
+    UserAction -> SelectExpense [label="View Details"];
+    SelectExpense -> GetExpenseDetails;
+    GetExpenseDetails -> BackendResponseDetails;
+    BackendResponseDetails -> ErrorFetchDetails [label="Error"];
+    ErrorFetchDetails -> ExpensesListScreen;
+    BackendResponseDetails -> ExpenseDetailsScreen [label="Success"];
+    ExpenseDetailsScreen -> ExpensesListScreen [label="Back"];
+
+    UserAction -> DeleteExpense [label="Delete"];
+    DeleteExpense -> DeleteExpenseAPI;
+    DeleteExpenseAPI -> BackendResponseDelete;
+    BackendResponseDelete -> ErrorDeleteExpense [label="Error"];
+    ErrorDeleteExpense -> ExpensesListScreen;
+    BackendResponseDelete -> SuccessDelete [label="Success"];
+    SuccessDelete -> FetchExpenses;
+}

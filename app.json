@@ -1,19 +1,40 @@
 {
   "expo": {
-    "scheme": "acme",
+    "name": "Personal Finance",
+    "slug": "pftm",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/images/icon.png",
+    "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "orientation": "default",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./src/assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.pftm"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "app.pftm"
+    },
     "web": {
-      "output": "static",
-      "bundler": "metro"
+      "favicon": "./src/assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      [
+        "expo-router"
+        
+      ]
     ],
-    "name": "pms",
-    "slug": "pms",
-    "android": {
-      "package": "com.anonymous.pms"
+    "experiments": {
+      "typedRoutes": true
     }
   }
 }
